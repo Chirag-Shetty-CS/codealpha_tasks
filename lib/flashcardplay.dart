@@ -18,6 +18,7 @@ class FlashcardPlayPage extends StatefulWidget {
 class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
   List<Map<String, Object?>> _qna = <Map<String, Object?>>[];
   bool _isLoading = true;
+  bool _isShowingAnswer = false;
   int _currentIndex = 0;
 
   @override
@@ -37,6 +38,7 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
     setState(() {
       _qna = rows.reversed.toList();
       _currentIndex = 0;
+      _isShowingAnswer = false;
       _isLoading = false;
     });
   }
@@ -49,6 +51,9 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
     final String currentQuestion = hasQuestions
         ? (_qna[_currentIndex]['question'] as String? ?? '')
         : 'No questions available for this topic.';
+    final String currentAnswer = hasQuestions
+        ? (_qna[_currentIndex]['answer'] as String? ?? '')
+        : '';
     final String positionText = hasQuestions
         ? '${_currentIndex + 1}/${_qna.length}'
         : '0/0';
@@ -65,31 +70,42 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: <Widget>[
-                      SizedBox(
-                        height: constraints.maxHeight * 0.60,
-                        width: double.infinity,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: <BoxShadow>[
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
-                                blurRadius: 14,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Center(
-                              child: Text(
-                                currentQuestion,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: hasQuestions ? 28 : 20,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.3,
+                      GestureDetector(
+                        onTap: hasQuestions
+                            ? () {
+                                setState(() {
+                                  _isShowingAnswer = !_isShowingAnswer;
+                                });
+                              }
+                            : null,
+                        child: SizedBox(
+                          height: constraints.maxHeight * 0.60,
+                          width: double.infinity,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: _isShowingAnswer ? Colors.lightGreen : Colors.white,
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: <BoxShadow>[
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 14,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Center(
+                                child: Text(
+                                  _isShowingAnswer ? currentAnswer : currentQuestion,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: hasQuestions ? 28 : 20,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.3,
+                                    // Set text color to white when background is teal
+                                    color: _isShowingAnswer ? Colors.white : Colors.black87,
+                                  ),
                                 ),
                               ),
                             ),
@@ -105,6 +121,7 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
                                 ? () {
                                     setState(() {
                                       _currentIndex -= 1;
+                                      _isShowingAnswer = false;
                                     });
                                   }
                                 : null,
@@ -125,6 +142,7 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
                                 ? () {
                                     setState(() {
                                       _currentIndex += 1;
+                                      _isShowingAnswer = false;
                                     });
                                   }
                                 : null,

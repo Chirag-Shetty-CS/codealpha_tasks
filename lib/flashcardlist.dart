@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
+import 'flashcardplay.dart';
 
 class FlashcardListPage extends StatefulWidget {
   const FlashcardListPage({
@@ -40,64 +41,29 @@ class _FlashcardListPageState extends State<FlashcardListPage> {
   }
 
   Future<void> _showAddFlashcardDialog() async {
-    final TextEditingController questionController = TextEditingController();
-    final TextEditingController answerController = TextEditingController();
-
-    final bool? shouldSave = await showDialog<bool>(
+    final result = await showDialog<Map<String, String>>(
       context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('Add Flashcard'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                controller: questionController,
-                autofocus: true,
-                textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Enter question',
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: answerController,
-                textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'Enter answer',
-                ),
-                onSubmitted: (_) => Navigator.of(dialogContext).pop(true),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+      builder: (BuildContext dialogContext) => const _AddFlashcardDialog(),
     );
 
-    final String question = questionController.text.trim();
-    final String answer = answerController.text.trim();
+    if (result != null) {
+      final String question = result['question'] ?? '';
+      final String answer = result['answer'] ?? '';
 
-    if (shouldSave == true && question.isNotEmpty && answer.isNotEmpty) {
-      await DatabaseHelper.instance.insertQnA(
-        topicId: widget.topicId,
-        question: question,
-        answer: answer,
-      );
-      await _loadQnA();
+      if (question.isNotEmpty && answer.isNotEmpty) {
+        await DatabaseHelper.instance.insertQnA(
+          topicId: widget.topicId,
+          question: question,
+          answer: answer,
+        );
+        await _loadQnA();
+      }
     }
+  }
 
-    questionController.dispose();
-    answerController.dispose();
+  Future<void> _deleteQuestion(int qnaId) async {
+    await DatabaseHelper.instance.deleteTopicData(qnaId);
+    await _loadQnA();
   }
 
   @override
@@ -125,17 +91,107 @@ class _FlashcardListPageState extends State<FlashcardListPage> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (BuildContext context, int index) {
                     final Map<String, Object?> row = _qna[index];
+                    final int qnaId = row['id'] as int;
                     final String question = row['question'] as String? ?? '';
-                    final String answer = row['answer'] as String? ?? '';
 
                     return Card(
                       child: ListTile(
                         title: Text(question),
-                        subtitle: answer.isEmpty ? null : Text(answer),
+                        trailing: IconButton(
+                          onPressed: () => _deleteQuestion(qnaId),
+                          icon: const Icon(Icons.close),
+                          tooltip: 'Delete question',
+                        ),
                       ),
                     );
                   },
                 ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => FlashcardPlayPage(
+                topicId: widget.topicId,
+                topicName: widget.topicName,
+              ),
+            ),
+          );
+        },
+        tooltip: 'Play flashcards',
+        child: const Icon(Icons.play_arrow),
+      ),
+    );
+  }
+}
+
+class _AddFlashcardDialog extends StatefulWidget {
+  const _AddFlashcardDialog();
+
+  @override
+  State<_AddFlashcardDialog> createState() => _AddFlashcardDialogState();
+}
+
+class _AddFlashcardDialogState extends State<_AddFlashcardDialog> {
+  final TextEditingController _questionController = TextEditingController();
+  final TextEditingController _answerController = TextEditingController();
+
+  @override
+  void dispose() {
+    _questionController.dispose();
+    _answerController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final String question = _questionController.text.trim();
+    final String answer = _answerController.text.trim();
+    if (question.isNotEmpty && answer.isNotEmpty) {
+      Navigator.of(context).pop({
+        'question': question,
+        'answer': answer,
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Add Flashcard'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              controller: _questionController,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Enter question',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _answerController,
+              textInputAction: TextInputAction.done,
+              decoration: const InputDecoration(
+                labelText: 'Enter answer',
+              ),
+              onSubmitted: (_) => _submit(),
+            ),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }
