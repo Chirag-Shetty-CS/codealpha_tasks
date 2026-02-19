@@ -90,6 +90,52 @@ class DatabaseHelper {
     );
   }
 
+  Future<int> updateTopicName({
+    required int topicId,
+    required String newTopicName,
+  }) async {
+    final Database db = await database;
+    final String trimmed = newTopicName.trim();
+    if (trimmed.isEmpty) {
+      return 0;
+    }
+    return db.update(
+      'topics',
+      <String, Object?>{'topic': trimmed},
+      where: 'id = ?',
+      whereArgs: <Object>[topicId],
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<int> updateQnA({
+    required int qnaId,
+    String? newQuestion,
+    String? newAnswer,
+  }) async {
+    final Database db = await database;
+    final String question = (newQuestion ?? '').trim();
+    final String answer = (newAnswer ?? '').trim();
+    final Map<String, Object?> updates = <String, Object?>{};
+
+    if (question.isNotEmpty) {
+      updates['question'] = question;
+    }
+    if (answer.isNotEmpty) {
+      updates['answer'] = answer;
+    }
+    if (updates.isEmpty) {
+      return 0;
+    }
+
+    return db.update(
+      'qna',
+      updates,
+      where: 'id = ?',
+      whereArgs: <Object>[qnaId],
+    );
+  }
+
   Future<int> deleteTopic(int topicId) async {
     final Database db = await database;
     return db.delete(

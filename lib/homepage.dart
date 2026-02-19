@@ -107,6 +107,50 @@ class _HomePageState extends State<HomePage> {
     await _loadTopics();
   }
 
+  Future<void> _showEditTopicDialog(Topic topic) async {
+    _topicController.clear();
+
+    final String? newTopicName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Edit Topic'),
+          content: TextField(
+            controller: _topicController,
+            autofocus: true,
+            textInputAction: TextInputAction.done,
+            decoration: const InputDecoration(
+              hintText: 'New Topic Name',
+            ),
+            onSubmitted: (String value) {
+              Navigator.of(dialogContext).pop(value.trim());
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(_topicController.text.trim());
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newTopicName != null && newTopicName.trim().isNotEmpty) {
+      await DatabaseHelper.instance.updateTopicName(
+        topicId: topic.id,
+        newTopicName: newTopicName,
+      );
+      await _loadTopics();
+    }
+  }
+
   @override
   void dispose() {
     _topicController.dispose();
@@ -118,6 +162,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Topics'),
+        backgroundColor: Colors.orangeAccent,
         actions: <Widget>[
           IconButton(
             onPressed: _showAddTopicDialog,
@@ -136,16 +181,26 @@ class _HomePageState extends State<HomePage> {
               : ListView.separated(
                   itemCount: _topics.length,
                   padding: const EdgeInsets.all(12),
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, __) => const SizedBox(height: 5),
                   itemBuilder: (BuildContext context, int index) {
                     final Topic topic = _topics[index];
                     return Card(
                       child: ListTile(
                         title: Text(topic.name),
-                        trailing: IconButton(
-                          onPressed: () => _deleteTopic(topic.id),
-                          icon: const Icon(Icons.close),
-                          tooltip: 'Delete topic',
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            IconButton(
+                              onPressed: () => _showEditTopicDialog(topic),
+                              icon: const Icon(Icons.edit),
+                              tooltip: 'Edit topic',
+                            ),
+                            IconButton(
+                              onPressed: () => _deleteTopic(topic.id),
+                              icon: const Icon(Icons.close),
+                              tooltip: 'Delete topic',
+                            ),
+                          ],
                         ),
                         onTap: () {
                           Navigator.pushNamed(

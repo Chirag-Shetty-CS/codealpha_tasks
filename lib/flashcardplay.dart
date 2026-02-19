@@ -36,7 +36,7 @@ class _FlashcardPlayPageState extends State<FlashcardPlayPage> {
     }
 
     setState(() {
-      _qna = rows.reversed.toList();
+      _qna = rows;
       _currentIndex = 0;
       _isShowingAnswer = false;
       _isLoading = false;
