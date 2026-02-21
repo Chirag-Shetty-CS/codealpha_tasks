@@ -6,3 +6,8 @@ It is a Flutter app that:
 ● Each quote displays text and author name clearly. 
 ● And has a clean and minimal UI for better user experience. 
 
+The app uses:
+● zenquotes.io/api/random to get Quotes with their Authors.
+● HTTP package to sends request to the API and retrieves the response.
+● convert package to convert the JSON response into normal string datatype.
+● fluttertoast package to show my name when the app is opened.
