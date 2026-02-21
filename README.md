@@ -14,3 +14,5 @@ The app uses:
 * [fluttertoast] package to show my name when the app is opened.
 * [flutter_launcher_icons] package to add icon to the app.
 
+## Credits: 
+Made by Chirag Shetty for Code Alpha Internship
