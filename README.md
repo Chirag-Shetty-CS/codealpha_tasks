@@ -1,16 +1,10 @@
-# flashcardquiz
+# Flashcard Quiz
 
-A new Flutter project.
+It is a Flutter app to Create flashcard for studying. 
+Users can: 
+● Each flashcard have a question on the front and answer on the back, with tap to "Show Answer". 
+● Users can navigate between cards using "Next" and "Previous" buttons. 
+● Users can add, edit, and delete flashcards for customization. This includes flashcard subject/topic and the question and answer. 
+● The app has a simple and clean user interface for easy usage. 
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The app uses SQFlite package for data storage purpose and flutter_launcher_icons package to add an icon to the app.
