@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'database_helper.dart';
 
 class Topic {
@@ -31,6 +32,17 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _initializeDatabase();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Fluttertoast.showToast(
+        msg: "App by - Chirag-Shetty-CS",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    });
   }
 
   Future<void> _initializeDatabase() async {
